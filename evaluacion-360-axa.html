@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación 360° - Resultados</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #00008F 0%, #0000B8 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 143, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .persona-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid transparent;
+        }
+        
+        .persona-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 143, 0.2);
+            border-color: #00008F;
+        }
+        
+        .persona-card.active {
+            border-color: #E4002B;
+            background: #f8f9ff;
+        }
+        
+        .persona-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #00008F;
+            margin-bottom: 15px;
+        }
+        
+        .evaluaciones-count {
+            background: #E4002B;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .detalle-container {
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .detalle-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .detalle-header {
+            border-bottom: 3px solid #00008F;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .detalle-nombre {
+            font-size: 2em;
+            color: #00008F;
+            font-weight: bold;
+        }
+        
+        .charts-section {
+            max-width: 500px;
+            margin: 0 auto 40px auto;
+        }
+        
+        .chart-container {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e0e5ff;
+        }
+        
+        .chart-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00008F;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .competencia-section {
+            margin-bottom: 40px;
+            border: 2px solid #e0e5ff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .competencia-header {
+            background: linear-gradient(135deg, #00008F 0%, #0000B8 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .competencia-content {
+            padding: 25px;
+        }
+        
+        .evaluacion-item {
+            background: #f8f9ff;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #00008F;
+        }
+        
+        .calificacion {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+        }
+        
+        .calificacion.shu {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .calificacion.ha {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .calificacion.ri {
+            background: #F44336;
+            color: white;
+        }
+        
+        .calificacion.no-info {
+            background: #9E9E9E;
+            color: white;
+        }
+        
+        .comentario {
+            color: #444;
+            line-height: 1.6;
+            margin-top: 10px;
+            font-style: italic;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .evaluador {
+            color: #E4002B;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+        
+        .resumen-general {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #00008F;
+        }
+        
+        .resumen-title {
+            font-size: 1.5em;
+            color: #00008F;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .resumen-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00008F;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Evaluación 360° - Resultados</h1>
+            <p>Valoración de competencias - Product Managers & Scrum Masters</p>
+        </div>
+        
+        <div class="personas-grid" id="personasGrid"></div>
+        
+        <div class="detalle-container" id="detalleContainer"></div>
+    </div>
+
+    <script>
+        const competencias = [
+            "Comunicación Efectiva",
+            "Liderazgo: Inspirar - Servir",
+            "Trabajo en Equipo",
+            "Orientación al Resultados / Entrega Valor Priorización",
+            "Adaptación al cambio",
+            "Conocimiento en metodologías de Proyecto"
+        ];
+
+        const evaluaciones = [
+            {persona: "Maria V Mejia", evaluador: "", calificaciones: ["HA (Practicante) Medio", "HA (Practicante) Medio", "HA (Practicante) Medio", "SHU (Maestro) Alto", "HA (Practicante) Medio", "SHU (Maestro) Alto"], comentarios: ["", "", "Creo que en trabajo en equipo, le falta confiar mas en su equipo y soltar ", "", "", "", "Debemos mejorar en el micromanager, ya que el trabajo en equipo se trata de creer en el la otra persona y confiar, en su trabajo, esto le permite crecer mucho mas, "]},
+            {persona: "Maria V Mejia", evaluador: "Johanna Skinner", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto"], comentarios: ["Es una lider con un excelente nivel de comunicación", "Es una colaboradora que muestra Liderazgo en su trabajo diario ", "Gestiona equipos y tiene habilidades para trabajo en equipo", "Maneja foco en los resultados en los proyectos que dirige", "Tiene buena gestión del cambio ", "Es muy organizada, estricta y conoce herramientas de seguimiento y manejo de proyectos", "Es muy buena lider de proyectos, tiene una actitud de servicio "]},
+            {persona: "Maria V Mejia", evaluador: "Manuel Ricardo Jaime Gallo", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto"], comentarios: ["", "", "", "", "", "", "María Victoria tiene un alto nivel de organización, seguimiento y creatividad, así como una importante habilidad para entender y comprender rápidamente los procesos nuevos, lo que le permite generar y aportar nuevas ideas para asegurar el éxito en cada proyecto.   "]},
+            {persona: "Maria V Mejia", evaluador: "", calificaciones: ["SHU (Maestro) Alto", "RI (Aprendiz) Bajo", "HA (Practicante) Medio", "HA (Practicante) Medio", "RI (Aprendiz) Bajo", "HA (Practicante) Medio"], comentarios: ["", "podria asignar mas reponsabilidades y no solo tareas", "", "", "", "podria re-pensar como y cuando adaptar las metodologias acorde a los resultados requeridos para el negocio", "Maria V, es clara en la presentación de sus puntos en las sesiones, puede ser un poco emocional en su comunicación en ocasiones, y se ve que hasta que no haya una oficialización de los cambios le puede costar asumirlos"]},
+            {persona: "Maria V Mejia", evaluador: "", calificaciones: ["SHU (Maestro) Alto", "HA (Practicante) Medio", "HA (Practicante) Medio", "HA (Practicante) Medio", "HA (Practicante) Medio", "SHU (Maestro) Alto"], comentarios: ["", "", "", "", "", "", "Navegas muy bien en la compañía y tienes buen olfato para detectar las motivaciones internas . Eres muy enfocada en el logro, solo te recomendaría tomarte una pausa para pensar porque puedes llegar a ser muy acelerada y eso puede jugar en contra de la calidad."]},
+            {persona: "Diana Mesa", evaluador: "", calificaciones: ["HA (Practicante) Medio", "RI (Aprendiz) Bajo", "RI (Aprendiz) Bajo", "HA (Practicante) Medio", "HA (Practicante) Medio", "RI (Aprendiz) Bajo"], comentarios: ["", "", "", "", "", "", "Quiero agradecerte por tu positividad y por mantener una sonrisa constante. También quiero comentar una oportunidad de mejora: en algunos momentos se han generado discusiones con colegas, lo que ha generado indisposición en el equipo. Sería útil trabajar en inteligencia emocional y en prácticas de trabajo en equipo para evitar conflictos y mejorar la colaboración. "]},
+            {persona: "Jessica Contreras", evaluador: "", calificaciones: ["HA (Practicante) Medio", "HA (Practicante) Medio", "SHU (Maestro) Alto", "HA (Practicante) Medio", "HA (Practicante) Medio", "HA (Practicante) Medio"], comentarios: ["", "", "", "", "", "", "Jessica eres muy pila, se nota cada día aprendes mucho mas y eres excelente trabajando en equipo, "]},
+            {persona: "Steven Gonzalez", evaluador: "", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "No Tengo Suficiente Información", "SHU (Maestro) Alto", "SHU (Maestro) Alto"], comentarios: ["", "", "", "", "", ""]},
+            {persona: "Steven Gonzalez", evaluador: "Carol Rocio Rodriguez Guerrero", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "HA (Practicante) Medio", "SHU (Maestro) Alto"], comentarios: ["Excelente comunicación, manejo de lenguaje asertivo y fluidez con elocuencia y puntualidad en el mensaje", "Conecta con el equipo y propone ideas", "Excelente disposición y apoyo", "Orientación al logro y gestión con proposito", "Aunque no he tenido una situación puntual vista para esta habilidad, es muy receptivo y flexible a nuevas ideas", "Conocimiento excepcional, de varias metodologías, adicionalmente cuenta ", "Felicitaciones!!!  Tus conocimientos, profesionalismo y excelente actitud, son inspiradores y motivan la implementación de grandes proyectos."]},
+            {persona: "Steven Gonzalez", evaluador: "María E. Alarcón", calificaciones: ["SHU (Maestro) Alto", "No Tengo Suficiente Información", "SHU (Maestro) Alto", "No Tengo Suficiente Información", "No Tengo Suficiente Información", "SHU (Maestro) Alto"], comentarios: ["En las interacciones que he tenido la comunicación ha sido clara.", "N.A.", "Comparte su conocimiento y buenas prácticas.", "No aplica", "No aplica", "Evidencio un conocimiento claro de su rol y su acoplamiento con la metodología de la PMO", "Mis interacciones con Steven ha sido muy puntuales, sin embargo, valoro mucho las practicas propuestas (Ej: Managment 3.0) para el fortalecimiento del equipo y que comparte su conocimiento referente a la metodología de proyectos o buenas prácticas."]},
+            {persona: "Carlos Torres", evaluador: "Johanna Skinner", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "HA (Practicante) Medio", "SHU (Maestro) Alto"], comentarios: ["Tiene habilidades de comunicación", "Muestra su liderazgo y experiencia", "Tiene apertura para trabajo en equipo", "Excelente en entrega de resultados ", "Al principio senti que le costo un poco, pero puso adaptarse a la cultura", "Excelente ", "Es un Ingeniero con muy buenas habilidades y herramientas de gestión de proyectos"]},
+            {persona: "Carlos Torres", evaluador: "Fredy Sanabria", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto"], comentarios: ["", "", "", "", "", "", "Es un excelente profesional, promueve el trabajo en equipo, apoya en lo necesario para todo lo que se requiera del proyecto en temas funcionales y hasta técnicos. Transmite con claridad sus necesidades, preocupaciones a nivel del proyecto. Excelente inteligencia emocional "]},
+            {persona: "Carlos Torres", evaluador: "María E. Alarcón", calificaciones: ["SHU (Maestro) Alto", "HA (Practicante) Medio", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "No Tengo Suficiente Información", "SHU (Maestro) Alto"], comentarios: ["En las interacciones que he tenido con Carlos en diferentes escenarios he evidenciado esta habilidad.", "Considero que es uno de los aspectos que debe seguir fortaleciendo.", "Ninguno.", "Ninguno", "N.A.", "Se evidencia su conocimiento en las metodologías.", "Su organización permite que el proyecto fluya de una manera eficiente y efectiva. Considero que seguir trabajando en la flexibilidad."]},
+            {persona: "Carlos Torres", evaluador: "Camilo Andrés Ramírez", calificaciones: ["SHU (Maestro) Alto", "SHU (Maestro) Alto", "No Tengo Suficiente Información", "SHU (Maestro) Alto", "No Tengo Suficiente Información", "SHU (Maestro) Alto"], comentarios: ["La comunicación en transparente y efectiva", "Gran capacidad para organizar y motivar no lo su equipo asiganados, sino también, los diferntes grupos de trabajo", "", "", "", "", "Es clara la experiencia y dominio los temas, y desde mi visión resulta de gran valor que el conocimiento en temas técnicos relacionado a datos. También, destaco el interes y la capacidad de gestionar todo lo posible en pro a cumplir las mesas propuestas."]},
+            {persona: "Carlos Torres", evaluador: "", calificaciones: ["SHU (Maestro) Alto", "HA (Practicante) Medio", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto", "SHU (Maestro) Alto"], comentarios: ["", "Muestra una buena disposición para colaborar y apoyar al equipo, pero aún hay oportunidades de mejora en cuanto a delegar con mayor autonomía, especialmente al permitir que roles como el de Business Analyst (BA) desarrollen completamente sus responsabilidades. Con pequeños ajustes en este aspecto, podría potenciar aún más el liderazgo y la motivación dentro del equipo.", "", "", "", ""]}
+        ];
+
+        function agruparPorPersona() {
+            const grouped = {};
+            evaluaciones.forEach(ev => {
+                if (!grouped[ev.persona]) {
+                    grouped[ev.persona] = [];
+                }
+                grouped[ev.persona].push(ev);
+            });
+            return grouped;
+        }
+
+        function calcularEstadisticas(evaluacionesPersona) {
+            const counts = { shu: 0, ha: 0, ri: 0, noInfo: 0 };
+            
+            evaluacionesPersona.forEach(ev => {
+                ev.calificaciones.forEach(cal => {
+                    if (cal.includes("SHU")) counts.shu++;
+                    else if (cal.includes("HA")) counts.ha++;
+                    else if (cal.includes("RI")) counts.ri++;
+                    else counts.noInfo++;
+                });
+            });
+
+            return { counts, total: evaluacionesPersona.length };
+        }
+
+        function renderPersonas() {
+            const grid = document.getElementById('personasGrid');
+            const grouped = agruparPorPersona();
+            
+            // Agregar tarjeta de consolidado general
+            const consolidadoCard = document.createElement('div');
+            consolidadoCard.className = 'persona-card';
+            consolidadoCard.style.background = 'linear-gradient(135deg, #00008F 0%, #0000B8 100%)';
+            consolidadoCard.style.color = 'white';
+            consolidadoCard.innerHTML = `
+                <div class="persona-name" style="color: white;">📊 Consolidado del Equipo</div>
+                <div class="evaluaciones-count" style="background: #E4002B;">Ver análisis general</div>
+            `;
+            consolidadoCard.onclick = () => mostrarConsolidado();
+            grid.appendChild(consolidadoCard);
+            
+            Object.keys(grouped).sort().forEach(persona => {
+                const stats = calcularEstadisticas(grouped[persona]);
+                const card = document.createElement('div');
+                card.className = 'persona-card';
+                card.innerHTML = `
+                    <div class="persona-name">${persona}</div>
+                    <div class="evaluaciones-count">${stats.total} evaluaciones</div>
+                `;
+                card.onclick = () => mostrarDetalle(persona, grouped[persona]);
+                grid.appendChild(card);
+            });
+        }
+
+        let chartsInstances = [];
+
+        function mostrarDetalle(persona, evaluacionesPersona) {
+            // Actualizar cards activas
+            document.querySelectorAll('.persona-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.querySelector('.persona-name').textContent === persona) {
+                    card.classList.add('active');
+                }
+            });
+
+            const container = document.getElementById('detalleContainer');
+            const stats = calcularEstadisticas(evaluacionesPersona);
+            
+            // Destruir gráficas anteriores
+            chartsInstances.forEach(chart => chart.destroy());
+            chartsInstances = [];
+
+            // HTML del detalle
+            let html = `
+                <div class="detalle-header">
+                    <div class="detalle-nombre">${persona}</div>
+                </div>
+
+                <div class="resumen-general">
+                    <div class="resumen-title">Resumen General</div>
+                    <div class="resumen-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Evaluaciones</div>
+                            <div class="stat-value">${stats.total}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">SHU (Maestro)</div>
+                            <div class="stat-value" style="color: #4CAF50">${stats.counts.shu}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">HA (Practicante)</div>
+                            <div class="stat-value" style="color: #FF9800">${stats.counts.ha}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">RI (Aprendiz)</div>
+                            <div class="stat-value" style="color: #F44336">${stats.counts.ri}</div>
+                        </div>
+                    </div>
+                </div>
+
+
+            `;
+
+            // Detalles por competencia
+            competencias.forEach((comp, idx) => {
+                // Calcular distribución para esta competencia específica
+                let shuCount = 0, haCount = 0, riCount = 0, noInfoCount = 0;
+                evaluacionesPersona.forEach(ev => {
+                    const cal = ev.calificaciones[idx];
+                    if (cal.includes('SHU')) shuCount++;
+                    else if (cal.includes('HA')) haCount++;
+                    else if (cal.includes('RI')) riCount++;
+                    else noInfoCount++;
+                });
+
+                html += `
+                    <div class="competencia-section">
+                        <div class="competencia-header">${idx + 1}. ${comp}</div>
+                        <div class="competencia-content">
+                            <div class="chart-container" style="max-width: 400px; margin: 0 auto 30px auto;">
+                                <div class="chart-title">Distribución en esta Competencia</div>
+                                <canvas id="chartComp${idx}"></canvas>
+                            </div>
+                `;
+
+                evaluacionesPersona.forEach((ev, evIdx) => {
+                    const cal = ev.calificaciones[idx];
+                    const com = ev.comentarios[idx];
+                    const comGeneral = ev.comentarios[6];
+                    
+                    let calClass = 'no-info';
+                    if (cal.includes('SHU')) calClass = 'shu';
+                    else if (cal.includes('HA')) calClass = 'ha';
+                    else if (cal.includes('RI')) calClass = 'ri';
+
+                    html += `
+                        <div class="evaluacion-item">
+                            <div><span class="calificacion ${calClass}">${cal}</span></div>
+                            ${com ? `<div class="comentario">"${com}"</div>` : '<div class="comentario" style="color: #999; font-style: italic;">Sin comentario</div>'}
+                            <div class="evaluador">Evaluador: ${ev.evaluador || 'Anónimo'}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Sección de Feedback General
+            html += `
+                <div class="competencia-section">
+                    <div class="competencia-header" style="background: linear-gradient(135deg, #E4002B 0%, #C00024 100%);">💬 Feedback General</div>
+                    <div class="competencia-content">
+            `;
+
+            evaluacionesPersona.forEach((ev, evIdx) => {
+                const comGeneral = ev.comentarios[6];
+                
+                html += `
+                    <div class="evaluacion-item">
+                        ${comGeneral ? `<div class="comentario">"${comGeneral}"</div>` : '<div class="comentario" style="color: #999; font-style: italic;">Sin comentario general</div>'}
+                        <div class="evaluador">Evaluador: ${ev.evaluador || 'Anónimo'}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            // Crear gráficas por competencia
+            setTimeout(() => {
+                competencias.forEach((comp, idx) => {
+                    // Calcular distribución para esta competencia
+                    let shuCount = 0, haCount = 0, riCount = 0, noInfoCount = 0;
+                    evaluacionesPersona.forEach(ev => {
+                        const cal = ev.calificaciones[idx];
+                        if (cal.includes('SHU')) shuCount++;
+                        else if (cal.includes('HA')) haCount++;
+                        else if (cal.includes('RI')) riCount++;
+                        else noInfoCount++;
+                    });
+
+                    const ctx = document.getElementById(`chartComp${idx}`);
+                    if (ctx) {
+                        const chart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['SHU (Maestro)', 'HA (Practicante)', 'RI (Aprendiz)', 'Sin Información'],
+                                datasets: [{
+                                    data: [shuCount, haCount, riCount, noInfoCount],
+                                    backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#9E9E9E']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            font: {
+                                                size: 11
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        chartsInstances.push(chart);
+                    }
+                });
+            }, 100);
+
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function mostrarConsolidado() {
+            // Actualizar cards activas
+            document.querySelectorAll('.persona-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.querySelector('.persona-name').textContent.includes('Consolidado')) {
+                    card.classList.add('active');
+                }
+            });
+
+            const container = document.getElementById('detalleContainer');
+            
+            // Destruir gráficas anteriores
+            chartsInstances.forEach(chart => chart.destroy());
+            chartsInstances = [];
+
+            // Calcular estadísticas generales
+            let totalSHU = 0, totalHA = 0, totalRI = 0, totalNoInfo = 0;
+            evaluaciones.forEach(ev => {
+                ev.calificaciones.forEach(cal => {
+                    if (cal.includes("SHU")) totalSHU++;
+                    else if (cal.includes("HA")) totalHA++;
+                    else if (cal.includes("RI")) totalRI++;
+                    else totalNoInfo++;
+                });
+            });
+
+            const totalCalificaciones = totalSHU + totalHA + totalRI + totalNoInfo;
+            const personas = [...new Set(evaluaciones.map(e => e.persona))];
+
+            // Análisis por competencia
+            const resultadosPorCompetencia = competencias.map((comp, idx) => {
+                let shu = 0, ha = 0, ri = 0, noInfo = 0;
+                evaluaciones.forEach(ev => {
+                    const cal = ev.calificaciones[idx];
+                    if (cal.includes("SHU")) shu++;
+                    else if (cal.includes("HA")) ha++;
+                    else if (cal.includes("RI")) ri++;
+                    else noInfo++;
+                });
+                const total = shu + ha + ri;
+                const porcentajeSHU = total > 0 ? ((shu / total) * 100).toFixed(1) : 0;
+                return { competencia: comp, shu, ha, ri, noInfo, porcentajeSHU: parseFloat(porcentajeSHU) };
+            });
+
+            // Análisis por persona
+            const perfilesPorPersona = personas.map(persona => {
+                const evals = evaluaciones.filter(e => e.persona === persona);
+                let shu = 0, ha = 0, ri = 0;
+                evals.forEach(ev => {
+                    ev.calificaciones.forEach(cal => {
+                        if (cal.includes("SHU")) shu++;
+                        else if (cal.includes("HA")) ha++;
+                        else if (cal.includes("RI")) ri++;
+                    });
+                });
+                const total = shu + ha + ri;
+                const porcentajeSHU = total > 0 ? ((shu/total)*100).toFixed(1) : 0;
+                return { persona, evaluaciones: evals.length, shu, ha, ri, porcentajeSHU: parseFloat(porcentajeSHU) };
+            }).sort((a, b) => b.porcentajeSHU - a.porcentajeSHU);
+
+            const fortalezas = [...resultadosPorCompetencia].sort((a, b) => b.porcentajeSHU - a.porcentajeSHU).slice(0, 3);
+            const oportunidades = [...resultadosPorCompetencia].sort((a, b) => a.porcentajeSHU - b.porcentajeSHU).slice(0, 3);
+
+            let html = `
+                <div class="detalle-header">
+                    <div class="detalle-nombre">📊 Consolidado del Equipo</div>
+                </div>
+
+                <div class="resumen-general">
+                    <div class="resumen-title">Resumen General</div>
+                    <div class="resumen-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Personas</div>
+                            <div class="stat-value">${personas.length}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Evaluaciones</div>
+                            <div class="stat-value">${evaluaciones.length}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">SHU (Maestro)</div>
+                            <div class="stat-value" style="color: #4CAF50">${totalSHU}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">HA (Practicante)</div>
+                            <div class="stat-value" style="color: #FF9800">${totalHA}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">RI (Aprendiz)</div>
+                            <div class="stat-value" style="color: #F44336">${totalRI}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <div class="chart-title">Distribución General del Equipo</div>
+                        <canvas id="chartConsolidadoGeneral"></canvas>
+                    </div>
+                </div>
+
+                <div class="competencia-section">
+                    <div class="competencia-header" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">💪 Top 3 Fortalezas del Equipo</div>
+                    <div class="competencia-content">
+            `;
+
+            fortalezas.forEach((f, idx) => {
+                html += `
+                    <div class="evaluacion-item">
+                        <div style="font-size: 1.2em; font-weight: bold; color: #00008F; margin-bottom: 10px;">
+                            ${idx + 1}. ${f.competencia}
+                        </div>
+                        <div style="font-size: 1.1em; color: #4CAF50; font-weight: bold;">
+                            ${f.porcentajeSHU}% en nivel maestro
+                        </div>
+                        <div style="margin-top: 10px; color: #666;">
+                            SHU: ${f.shu} | HA: ${f.ha} | RI: ${f.ri}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+
+                <div class="competencia-section">
+                    <div class="competencia-header" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);">🎓 Top 3 Oportunidades de Mejora</div>
+                    <div class="competencia-content">
+            `;
+
+            oportunidades.forEach((o, idx) => {
+                html += `
+                    <div class="evaluacion-item">
+                        <div style="font-size: 1.2em; font-weight: bold; color: #00008F; margin-bottom: 10px;">
+                            ${idx + 1}. ${o.competencia}
+                        </div>
+                        <div style="font-size: 1.1em; color: #FF9800; font-weight: bold;">
+                            ${o.porcentajeSHU}% en nivel maestro
+                        </div>
+                        <div style="margin-top: 10px; color: #666;">
+                            SHU: ${o.shu} | HA: ${o.ha} | RI: ${o.ri}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+
+                <div class="competencia-section">
+                    <div class="competencia-header">📈 Detalle por Competencia</div>
+                    <div class="competencia-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+            `;
+
+            resultadosPorCompetencia.forEach((r, idx) => {
+                html += `
+                    <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; border: 2px solid #e0e5ff;">
+                        <div style="font-weight: bold; color: #00008F; margin-bottom: 15px; font-size: 1.1em;">
+                            ${idx + 1}. ${r.competencia}
+                        </div>
+                        <canvas id="chartCompConsolidado${idx}" style="max-height: 200px;"></canvas>
+                        <div style="margin-top: 15px; text-align: center;">
+                            <div style="font-size: 1.3em; font-weight: bold; color: #4CAF50;">
+                                ${r.porcentajeSHU}% maestro
+                            </div>
+                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                                SHU: ${r.shu} | HA: ${r.ha} | RI: ${r.ri}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            // Crear gráficas
+            setTimeout(() => {
+                // Gráfica general consolidada
+                const ctxGeneral = document.getElementById('chartConsolidadoGeneral');
+                if (ctxGeneral) {
+                    const chartGeneral = new Chart(ctxGeneral, {
+                        type: 'pie',
+                        data: {
+                            labels: ['SHU (Maestro)', 'HA (Practicante)', 'RI (Aprendiz)', 'Sin Información'],
+                            datasets: [{
+                                data: [totalSHU, totalHA, totalRI, totalNoInfo],
+                                backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#9E9E9E']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                    chartsInstances.push(chartGeneral);
+                }
+
+                // Gráficas por competencia
+                resultadosPorCompetencia.forEach((r, idx) => {
+                    const ctx = document.getElementById(`chartCompConsolidado${idx}`);
+                    if (ctx) {
+                        const chart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['SHU', 'HA', 'RI', 'Sin Info'],
+                                datasets: [{
+                                    data: [r.shu, r.ha, r.ri, r.noInfo],
+                                    backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#9E9E9E']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            font: { size: 10 }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        chartsInstances.push(chart);
+                    }
+                });
+            }, 100);
+
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        renderPersonas();
+    </script>
+</body>
+</html>
